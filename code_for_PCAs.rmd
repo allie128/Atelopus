@@ -1,0 +1,248 @@
+---
+title: "Code to make all PCAs"
+output: github_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Many of these approaches Sourced from A. Krohn's tutorial found [here](https://github.com/alexkrohn/AmargosaVoleTutorials/blob/master/pca_plots_with_ngsCovar.md)
+
+
+```{r setup, include=FALSE}
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+library(RColorBrewer)
+library(cluster)
+library(ggfortify)
+library(scales)
+library(scatterpie)
+```
+
+
+This code is for making all the PCA's found in the paper. First, to get the necessary input files (.cov) for each comparison you need to first calcualte genotype liklihoods using angsd, then input that file into pcangsd. All of these commands are listed below. All intermediate files can be found on [figshare](https://figshare.com/projects/Atelopus_Exome_Capture/82046).
+
+**for all samples (w/outgroups) - Fig S7:**
+
+angsd -GL 1 -out all_samps_w_outgroups_fix -nThreads 15 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam all_bam_list_w_outgroups_fix -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc combined_targetedRegionAndFlanking.fasta -ref combined_targetedRegionAndFlanking.fasta -fold 1
+
+
+python pcangsd.py -beagle all_samps_w_outgroups_fix.beagle.gz -n 190 -o all_samps_w_out_pcangsd_covar -threads 12 
+
+
+**for all samples (no outgroups) - Fig 1:**
+
+angsd -GL 1 -out all_samps_genolike_2_fix -nThreads 30 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam all_bam_list_2 -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc combined_targetedRegionAndFlanking.fasta -ref combined_targetedRegionAndFlanking.fasta -fold 1
+
+
+python pcangsd.py -beagle all_samps_genolike_2_fix.beagle.gz -n 187 -o all_samps_2_pcangsd_covar -threads 12
+
+**for A. varius only:**
+
+angsd -GL 1 -out Varius_all_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam all_varius_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc ../combined_targetedRegionAndFlanking.fasta -ref ../combined_targetedRegionAndFlanking.fasta -fold 1
+
+python pcangsd.py -beagle Varius_all_genolike_2.beagle.gz -n 140 -o varius_pcangsd_covar -threads 12
+
+
+**for El Cope West:**
+
+angsd -GL 1 -out Tig_all_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam Tig_all_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc ../combined_targetedRegionAndFlanking.fasta -ref ../combined_targetedRegionAndFlanking.fasta -fold 1
+
+python pcangsd.py -beagle Tig_all_genolike_2.beagle.gz -n 44 -o Tig_all_pcadapt_covar -threads 10
+
+
+**for Caribbean:**
+
+angsd -GL 1 -out Caribbean_all_fix_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam Caribbean_all_list_fix -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc ../combined_targetedRegionAndFlanking.fasta -ref ../combined_targetedRegionAndFlanking.fasta -fold 1
+
+python pcangsd.py -beagle Caribbean_all_fix_genolike_2.beagle.gz -o Caribbean_all_fix_pcangsd_covar -threads 10
+
+
+**for El Cope East:**
+
+angsd -GL 1 -out Elcope_new_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam ElCope_new_pop_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc ../combined_targetedRegionAndFlanking.fasta -ref ../combined_targetedRegionAndFlanking.fasta -fold 1
+
+python pcangsd.py -beagle Elcope_new_genolike_2.beagle.gz -o ElCope_new_pcangsd_covar -threads 10
+
+
+**for Santa Fe:**
+
+angsd -GL 1 -out CerroNegro_all_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam CerroNegro_all_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc ../combined_targetedRegionAndFlanking.fasta -ref ../combined_targetedRegionAndFlanking.fasta -fold 1
+
+python pcangsd.py -beagle CerroNegro_all_genolike_2.beagle.gz -o CerroNegro_all_pcangsd_covar -threads 10
+
+
+Now to read in the covariance matrix and make the figures:
+Let's start with figure S7
+
+```{r}
+#Start with the code for all the samples:
+#read in the covariance matrix caculated from pcangsd 
+
+covar <- read.table("all_samps_w_out_fix_pcangsd_covar.cov",stringsAsFactors = FALSE)
+
+#calculate pca
+eig <- eigen(covar, symm = TRUE)
+eig$val <- eig$val/sum(eig$val)
+
+variation <- signif(eig$val, digits = 3) * 100
+
+PC <- as.data.frame(eig$vectors)
+PC12 <- PC[,1:2]
+
+#now assign population values in the correct order
+
+PC$pop <- c(rep("2_El Cope West", 30),rep("4_El Cope", 1), rep("6_Caribbean", 5),rep("1_Santa Fe", 2),rep("5_Donoso", 1), rep("4_El Cope", 7),   rep("7_El Valle North", 2), rep("5_Donoso", 8), rep("2_El Cope West", 14),rep("4_El Cope", 9),rep("4_El Cope", 6),rep("4_El Cope", 6),rep("4_El Cope", 6),rep("3_El Cope South", 6), rep("6_Caribbean", 7), rep("6_Caribbean", 7),rep("6_Caribbean", 10), rep("7_El Valle North", 22),rep("8_El Valle South", 16), rep("7_El Valle North", 6), rep("1_Santa Fe", 15), rep("9_Outgroup",4))
+
+#add species level dimension
+PC$pop_sp <- c(rep("Atelopus varius", 46), rep("Atelopus zeteki", 2),rep("Atelopus varius", 79), rep("Atelopus zeteki", 44), rep("Atelopus varius", 15), "Atelopus varius", "Atelopus senex", "Atelopus chiriquiensis", "Atelopus varius")
+
+
+#get the colors right
+pal <- hue_pal()(8)
+pal <- c(pal, "#000000")
+#"#F8766D" "#CD9600" "#7CAE00" "#00BE67" "#00BFC4" "#00A9FF" "#C77CFF" "#FF61CC" "#000000"
+
+autoplot(prcomp(PC12),data=PC, colour='pop',shape='pop_sp',size=3, frame = F)+ theme_bw() + scale_color_manual(values = c("#F8766D","#CD9600","#7CAE00","#00BE67","#00BFC4","#00A9FF","#C77CFF","#FF61CC","#000000"))
+
+
+```
+
+For all samples (no outgroups) - Fig 1
+
+```{r}
+
+covar_2 <- read.table("all_samps_2_pcangsd_covar.cov",stringsAsFactors = FALSE)
+
+#calculate pca
+eig_2 <- eigen(covar_2, symm = TRUE)
+eig_2$val <- eig_2$val/sum(eig_2$val)
+
+variation_2 <- signif(eig_2$val, digits = 3) * 100
+
+PC_2 <- as.data.frame(eig_2$vectors)
+PC12_2 <- PC_2[,1:2]
+
+#now assign population values in the correct order
+
+PC_2$pop <- c(rep("2_El Cope West", 30),rep("4_El Cope", 1), rep("6_Caribbean", 5),rep("1_Santa Fe", 2),rep("5_Donoso", 1), rep("4_El Cope", 7),   rep("7_El Valle North", 2),rep("4_El Cope", 1), rep("5_Donoso", 8), rep("2_El Cope West", 14),rep("4_El Cope", 9),rep("4_El Cope", 6),rep("4_El Cope", 6),rep("4_El Cope", 6),rep("3_El Cope South", 6), rep("6_Caribbean", 7), rep("6_Caribbean", 7),rep("6_Caribbean", 10), rep("7_El Valle North", 22),rep("8_El Valle South", 16), rep("7_El Valle North", 6), rep("1_Santa Fe", 15))
+
+PC_2$pop_sp <- c(rep("Atelopus varius", 46), rep("Atelopus zeteki", 2),rep("Atelopus varius", 80), rep("Atelopus zeteki", 44), rep("Atelopus varius", 15))
+
+#use this code to generate the plot after assiging groupings via PC$pop
+ggplot(data=PC12_2, aes(x=PC12_2[,1],y=-PC12_2[,2],colour=as.factor(PC_2$pop), size=1, shape=as.factor(PC_2$pop_sp), frame = T)) + geom_point() + theme_bw() 
+
+
+```
+
+
+For only A. varius samples (Figure 4A) and the scatterpie in figure S5
+
+```{r}
+#Start with the code for all the samples:
+
+covar_3 <- read.table("varius_pcangsd_covar.cov",stringsAsFactors = FALSE)
+
+eig_3 <- eigen(covar_3, symm = TRUE)
+eig_3$val <- eig_3$val/sum(eig_3$val)
+
+variation <- signif(eig_3$val, digits = 3) * 100
+barplot(variation)
+
+PC_3 <- as.data.frame(eig_3$vectors)
+
+
+PC_3$pop <- c(rep("2_El Cope West", 30),rep("4_El Cope", 1), rep("6_Caribbean", 5),rep("1_Santa Fe", 2),rep("5_Donoso", 1), rep("4_El Cope", 7), rep("5_Donoso", 8), rep("2_El Cope West", 14),rep("4_El Cope", 9),rep("4_El Cope", 6),rep("4_El Cope", 6),rep("4_El Cope", 6),rep("3_El Cope South", 6), rep("6_Caribbean", 7), rep("6_Caribbean", 7),rep("6_Caribbean", 10), rep("1_Santa Fe", 15))
+
+#add time level dimension
+PC_3$pop_sp <- c(rep("Contemporary", 39), rep("Historic/Captive", 101))
+
+
+PC12_3 <- PC_3[,1:2]
+
+PC12_3_contemp <- PC12_3[1:39,]
+
+
+#make the plot with all points and contemp points on top
+ggplot(data=PC12_3, aes(x=PC12_3[,1],y=PC12_3[,2],colour=as.factor(PC_3$pop),size=2, frame = F)) + 
+  geom_point() + 
+  theme_bw() + 
+  scale_color_manual(values = c("#F8766D","#CD9600","#7CAE00","#00BE67","#00BFC4","#00A9FF"))+
+  geom_point(data=PC12_3_contemp,inherit.aes = FALSE, x=PC12_3_contemp[,1], y=PC12_3_contemp[,2], size=3, colour="black")
+ 
+  
+#make a scatterpie for El Cope West Only (see figure S5)
+
+
+scat_data <- read.csv(file="tig_samps_info_ngsadmix_order_w_pcdata.csv")
+
+ggplot() + geom_scatterpie(aes(x=PC1, y=PC2, group=Sample_ID, r=0.005), data=scat_data, cols=c('K1','K2','K3')) + coord_equal() + theme(panel.grid.major = element_line(colour = "light grey"),panel.background = element_blank(), axis.line = element_blank()) + scale_fill_manual(values=c("#4c4c4c","#cccccc","#999999")) 
+
+
+```
+
+Now to make figure S4 which compares all populations that have contemporary individuals:
+
+```{r}
+
+#for El Cope West samples
+covar_t <- read.table("Tig_all_pcadapt_covar.cov",stringsAsFactors = FALSE)
+eig_t <- eigen(covar_t, symm = TRUE)
+eig_t$val <- eig_t$val/sum(eig_t$val)
+variation_t <- signif(eig_t$val, digits = 3) * 100
+variation_t[1:4]
+PC_t <- as.data.frame(eig_t$vectors)
+PC_t$pop <- c(rep("Historic", 14), rep("Contemporary", 30))
+PC12_t <- PC_t[,1:2]
+
+autoplot(prcomp(PC12_t),data=PC_t, colour='pop',size=4, frame = TRUE)+theme_bw()
+
+
+#for Santa Fe samples
+covar_c <- read.table("CerroNegro_all_pcangsd_covar.cov",stringsAsFactors = FALSE)
+eig_c <- eigen(covar_c, symm = TRUE)
+eig_c$val <- eig_c$val/sum(eig_c$val)
+variation_c <- signif(eig_c$val, digits = 3) * 100
+variation_c[1:4]
+PC_c <- as.data.frame(eig_c$vectors)
+PC_c$pop <- c(rep("Contemporary", 2), rep("Historic", 15))
+PC12_c <- PC_c[,1:2]
+
+autoplot(prcomp(PC12_c),data=PC_c, colour='pop',size=3, frame = TRUE)+theme_bw()
+
+#for caribbean samples
+covar_ca <- read.table("Caribbean_all_fix_pcangsd_covar.cov",stringsAsFactors = FALSE)
+eig_ca <- eigen(covar_ca, symm = TRUE)
+eig_ca$val <- eig_ca$val/sum(eig_ca$val)
+variation_ca <- signif(eig_ca$val, digits = 3) * 100
+variation_ca[1:4]
+PC_ca <- as.data.frame(eig_ca$vectors)
+PC_ca$pop <- c(rep("Historic", 24), rep("Contemporary", 5))
+PC12_ca <- PC_ca[,1:2]
+
+
+autoplot(prcomp(PC12_ca),data=PC_ca, colour='pop',size=4, frame = TRUE)+theme_bw()
+
+
+#for El Cope East samples
+covar_ec <- read.table("ElCope_new_trim_pcangsd_covar.cov",stringsAsFactors = FALSE)
+eig_ec <- eigen(covar_ec, symm = TRUE)
+eig_ec$val <- eig_ec$val/sum(eig_ec$val)
+variation_ec <- signif(eig_ec$val, digits = 3) * 100
+variation_ec[1:4]
+PC_ec <- as.data.frame(eig_ec$vectors)
+
+PC_ec$pop <- c(rep("Historic", 27), rep("Contemporary", 1))
+
+PC12_ec <- PC_ec[,1:2]
+
+autoplot(prcomp(PC12_ec),data=PC_ec, colour='pop',size=4, frame = TRUE)+theme_bw()
+
+
+#export png dim 1000x700
+
+
+```
+
+
+
