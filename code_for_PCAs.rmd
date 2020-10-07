@@ -39,35 +39,35 @@ python pcangsd.py -beagle all_samps_genolike_2_fix.beagle.gz -n 187 -o all_samps
 
 **for A. varius only:**
 
-angsd -GL 1 -out Varius_all_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam all_varius_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc ../combined_targetedRegionAndFlanking.fasta -ref ../combined_targetedRegionAndFlanking.fasta -fold 1
+angsd -GL 1 -out Varius_all_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam all_varius_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc combined_targetedRegionAndFlanking.fasta -ref combined_targetedRegionAndFlanking.fasta -fold 1
 
 python pcangsd.py -beagle Varius_all_genolike_2.beagle.gz -n 140 -o varius_pcangsd_covar -threads 12
 
 
 **for El Cope West:**
 
-angsd -GL 1 -out Tig_all_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam Tig_all_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc ../combined_targetedRegionAndFlanking.fasta -ref ../combined_targetedRegionAndFlanking.fasta -fold 1
+angsd -GL 1 -out Tig_all_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam Tig_all_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc combined_targetedRegionAndFlanking.fasta -ref combined_targetedRegionAndFlanking.fasta -fold 1
 
 python pcangsd.py -beagle Tig_all_genolike_2.beagle.gz -n 44 -o Tig_all_pcadapt_covar -threads 10
 
 
 **for Caribbean:**
 
-angsd -GL 1 -out Caribbean_all_fix_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam Caribbean_all_list_fix -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc ../combined_targetedRegionAndFlanking.fasta -ref ../combined_targetedRegionAndFlanking.fasta -fold 1
+angsd -GL 1 -out Caribbean_all_fix_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam Caribbean_all_list_fix -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc combined_targetedRegionAndFlanking.fasta -ref combined_targetedRegionAndFlanking.fasta -fold 1
 
 python pcangsd.py -beagle Caribbean_all_fix_genolike_2.beagle.gz -o Caribbean_all_fix_pcangsd_covar -threads 10
 
 
 **for El Cope East:**
 
-angsd -GL 1 -out Elcope_new_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam ElCope_new_pop_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc ../combined_targetedRegionAndFlanking.fasta -ref ../combined_targetedRegionAndFlanking.fasta -fold 1
+angsd -GL 1 -out Elcope_new_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam ElCope_new_pop_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc combined_targetedRegionAndFlanking.fasta -ref combined_targetedRegionAndFlanking.fasta -fold 1
 
 python pcangsd.py -beagle Elcope_new_genolike_2.beagle.gz -o ElCope_new_pcangsd_covar -threads 10
 
 
 **for Santa Fe:**
 
-angsd -GL 1 -out CerroNegro_all_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam CerroNegro_all_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc ../combined_targetedRegionAndFlanking.fasta -ref ../combined_targetedRegionAndFlanking.fasta -fold 1
+angsd -GL 1 -out CerroNegro_all_genolike_2 -nThreads 10 -doGlf 2 -doMajorMinor 1 -SNP_pval 1e-6 -doMaf 1 -bam CerroNegro_all_list -sites Sites_passed_filters.keep -rf Sites_passed_filters.rf -anc combined_targetedRegionAndFlanking.fasta -ref combined_targetedRegionAndFlanking.fasta -fold 1
 
 python pcangsd.py -beagle CerroNegro_all_genolike_2.beagle.gz -o CerroNegro_all_pcangsd_covar -threads 10
 
