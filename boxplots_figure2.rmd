@@ -1,0 +1,35 @@
+---
+title: "boxplots for genetic diversity metrics""
+output: github_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Load the libraries
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(RColorBrewer)
+library(gridExtra)
+```
+
+Now read in the data:
+
+```{r}
+
+
+data <- read.csv(file="relatedness_data_for_boxplot_bypop.csv")
+
+plot1 <- ggplot(data, aes(x=Pop, y=Pairwise_Relatedness, fill=Pop)) + 
+    geom_boxplot() + theme_bw() + theme(legend.position = "none")
+
+data_2 <- read.csv(file="heterozygosity_data_for_boxplot.csv")
+
+plot2 <- ggplot(data_2, aes(x=Population, y=Heterozygosity, fill=Population)) + 
+    geom_boxplot() + theme_bw() + theme(legend.position = "none")
+
+
+grid.arrange(plot1, plot2, nrow=1, ncol=2)
+
+```
