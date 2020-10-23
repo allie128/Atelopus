@@ -53,7 +53,7 @@ We will start with El Cope West (Figure 4)
 #start with K=3 (the best K for El Cope West)
 admix <- t(as.matrix(read.table("tig_all_K3run1.qopt")))
 
-order_table <- read.csv("tig_samps_info_ngsadmix_order_w_pcdata.csv")
+order_table <- read.csv("tig_samps_info_ngsadmix_order.csv")
 
 admix_order <- cbind(t(admix),order_table$NewOrder)
 admix_order <- as_tibble(admix_order)
